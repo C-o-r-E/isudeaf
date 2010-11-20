@@ -117,7 +117,7 @@ digitalWrite(C4, HIGH); // Column 4
   else if(digitalRead(R3) == HIGH)
   {
     lcd.clear();
-    lcd.print("OCTOTHORP");
+    lcd.print("OCTOTHORPE");
   }
   else if(digitalRead(R4) == HIGH)
   {
