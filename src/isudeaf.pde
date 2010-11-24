@@ -1,4 +1,17 @@
-#define DEBUG 1
+/*    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+//#define DEBUG 1
 #include <avr/interrupt.h>
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
@@ -265,6 +278,7 @@ void loop()
       handleInputScreen5();
     }
   }
+  pwmToneDisable();
   #ifdef DEBUG
     //undocumented secret debug screen
     lcd.clear();
@@ -273,7 +287,9 @@ void loop()
     lcd.setCursor(0,1);
     lcd.print("last = ");
     lcd.print(EEPROM.read(1+(3*(cntDataPoints-1))), HEX);
+    lcd.print(" ");
     lcd.print(EEPROM.read(2+(3*(cntDataPoints-1))), HEX);
+    lcd.print(" ");
     lcd.print(EEPROM.read(3+(3*(cntDataPoints-1))), HEX);
     while(1);
   #endif
@@ -443,6 +459,7 @@ inline void handleInputScreen2()
   case k_NONE:
     break;
   case k_a:
+    earbuds = false;
     screen = s3;
     break;
   case k_b:
@@ -495,25 +512,26 @@ void handleInputScreen34()
     {
       unsigned char e_data;
       //the first byte
+      e_data = age;
       if(earbuds)
       {
         //set most significant bit for earbuds
-        e_data = 128;
+        e_data += 128;
       }
-      //set lower 7 bits for age
-      e_data += age;           
+      //set lower 7 bits for age           
       //write the first byte
       EEPROM.write(1+(3*cntDataPoints), e_data);
       //now write the first freq byte
-      e_data = *(unsigned char*)(frequency);
+      e_data = frequency >> 8;
       EEPROM.write(2+(3*cntDataPoints), e_data);
       //now the lower byte
-      e_data = *(unsigned char*)(frequency+1);
+      e_data = frequency;
       EEPROM.write(3+(3*cntDataPoints), e_data);
       //finally update the counter
       cntDataPoints++;
       EEPROM.write(0, cntDataPoints);
       done = true;
+      screen = s1;
       #ifdef DEBUG
         screen = s6;
       #endif
