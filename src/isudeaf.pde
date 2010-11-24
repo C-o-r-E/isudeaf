@@ -1,3 +1,4 @@
+#define DEBUG 1
 #include <avr/interrupt.h>
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
@@ -11,8 +12,6 @@
 #define R2 A2
 #define R3 A3
 #define R4 A4
-
-//#define SPEAKER A5
 
 enum Key {
   k_one,
@@ -34,13 +33,24 @@ enum Key {
   k_NONE
 };
 
-enum Screen {
-  s1,
-  s2,
-  s3,
-  s4,
-  s5
-};
+#ifndef DEBUG
+  enum Screen {
+    s1,
+    s2,
+    s3,
+    s4,
+    s5
+  };
+#else
+  enum Screen {
+    s1,
+    s2,
+    s3,
+    s4,
+    s5,
+    s6
+  };
+#endif
 
 Key lastKey = k_NONE;
 Key keyState = k_NONE;
@@ -50,6 +60,7 @@ unsigned char age;
 boolean earbuds;
 unsigned short frequency;
 unsigned short delta;
+boolean done;
 
 int cntDataPoints;
 
@@ -57,14 +68,10 @@ volatile int led = HIGH;
 LiquidCrystal lcd(0,1,2,3,4,5,6,7,8,A5,10);
 void setup()
 {
-  screen = s1; //start on screen1
-  age = 0;
-  earbuds = false;
-  frequency = 15000;
-  delta = 500;
-
   //get the number of saved data points
-  cntDataPoints = EEPROM.read(0); //counter will be store
+  cntDataPoints = EEPROM.read(0); //counter will be stored
+  if(cntDataPoints == 0xFF)
+    cntDataPoints ^= cntDataPoints;// bootstrap if this is first run
 
   pinMode(C1, OUTPUT);
   pinMode(C2, OUTPUT);
@@ -76,11 +83,7 @@ void setup()
   pinMode(R3, INPUT);
   pinMode(R4, INPUT);
 
-  //pinMode(SPEAKER, OUTPUT); 
-
   lcd.begin(16,4);
-
-  lcd.print("HerpaDerp");
 
   ////////////////////////////
   // set the 8 bit timer2
@@ -89,7 +92,7 @@ void setup()
   TCCR2B = 0x0D;
   TIMSK2 |= (1 << OCIE2A); //set bit 1 -> enable interupt CTC
 
-  sei();
+  //sei();
 
   //set Output Compare Register
   //OCR1AH = 0x00;
@@ -100,13 +103,6 @@ void setup()
 
 ISR(TIMER2_COMPA_vect) 
 {
-  /*
-  digitalWrite(SPEAKER, led);
-  if(led == HIGH)
-    led = LOW;
-  else
-    led = HIGH;
-    */
   ///////////////////////////////
   // Scan Keypad
   //////////////////////////////
@@ -203,22 +199,28 @@ ISR(TIMER2_COMPA_vect)
   }
   else
     keyState = k_NONE;  //nothing being pressed
-
-
 }
 
 void loop()
 {
+  //initialize some things here instead of in setup()
+  //since we come back here after a successful save
+  screen = s1; //start on screen1
+  age = 0;
+  earbuds = false;
+  frequency = 10000;
+  delta = 500;
+  done = false;// we just got started!
+  
   //////////////////////////////
   // Screen 1 -- get user age //
   //////////////////////////////
-
+  screen = s1;
   drawScreen1();
   while(screen == s1)
   {
     handleInputScreen1();
   }
-
 
   ///////////////////////////////////////
   // Screen 2 -- earbuds or headphones //
@@ -229,14 +231,12 @@ void loop()
     handleInputScreen2();
   }
 
-
   /**
    *  At this point, we need to enter a state that switches
    *  between states 3,4, and 5
    */
-  //tone(SPEAKER, frequency);
-  pwmTone(frequency);
-  while(1)// changeme
+  pwmTone(frequency); //start making annoying sounds
+  while(!done)// loop here until we get data from the user
   {
     ////////////////////////////
     // Screen 3 -- Help Menu //
@@ -265,12 +265,18 @@ void loop()
       handleInputScreen5();
     }
   }
-  //also temporary
-  lcd.clear();
-  lcd.print("game over");
-  while(1); //done
-
-
+  #ifdef DEBUG
+    //undocumented secret debug screen
+    lcd.clear();
+    lcd.print("cnt = ");
+    lcd.print(cntDataPoints, DEC);
+    lcd.setCursor(0,1);
+    lcd.print("last = ");
+    lcd.print(EEPROM.read(1+(3*(cntDataPoints-1))), HEX);
+    lcd.print(EEPROM.read(2+(3*(cntDataPoints-1))), HEX);
+    lcd.print(EEPROM.read(3+(3*(cntDataPoints-1))), HEX);
+    while(1);
+  #endif
 }
 
 void drawScreen1()
@@ -362,7 +368,7 @@ inline void handleInputScreen1()
 
   if(age > 10)
   {
-    //dont take any more digits
+    //dont take any more digits, assuming nobody we meet will be older that 99
     switch(keyState)
     {
     case k_a:
@@ -467,8 +473,6 @@ void handleInputScreen34()
       drawScreen4();
       //make the new frequency
       pwmTone(frequency);
-      //noTone(SPEAKER);
-      //tone(SPEAKER, frequency);
     }
     break;
   case k_b:
@@ -478,8 +482,6 @@ void handleInputScreen34()
       screen = s4;
       drawScreen4();
       pwmTone(frequency);
-      //noTone(SPEAKER);
-      //tone(SPEAKER, frequency);
     }
     break;
   case k_c:
@@ -489,7 +491,6 @@ void handleInputScreen34()
     screen = s3;
     break;
   case k_octothorpe:
-    break;
     if(screen = s4)
     {
       unsigned char e_data;
@@ -512,6 +513,10 @@ void handleInputScreen34()
       //finally update the counter
       cntDataPoints++;
       EEPROM.write(0, cntDataPoints);
+      done = true;
+      #ifdef DEBUG
+        screen = s6;
+      #endif
     }
     break;
   default:
@@ -527,27 +532,34 @@ inline void handleInputScreen5()
     return;
   switch(keyState)
   {
-  case k_NONE:
-    break;
-  case k_one: 
-    delta = 100;
-    screen = s4;
-    break;
-  case k_two:
-    delta = 500;
-    screen = s4;
-    break;
-  case k_three:
-    delta = 1000;
-    screen = s4;
-    break;
-  default:
-    break;//stub
+    case k_NONE:
+      break;
+    case k_one: 
+      delta = 100;
+      screen = s4;
+      break;
+    case k_two:
+      delta = 500;
+      screen = s4;
+      break;
+    case k_three:
+      delta = 1000;
+      screen = s4;
+      break;
+    default:
+      break;//stub
   }
   lastKey = keyState;
 
 }
 
+/*
+*  So after spending 3 days building rectifiers, Highpass filters,
+*  lowpass filters, amplifiers and RC networks to try and eliminate
+*  noise, it turned out that the Arduino tone(); function is flawed.
+*  It produces a 'fluttering noise' on high frequencies which 
+*  directly conflicts with this project. PWM to the rescue!!!
+*/
 void pwmTone(int _freq)
 {
    //assume pwm is not on so set the control registers
@@ -556,5 +568,10 @@ void pwmTone(int _freq)
    TCCR1A = _BV(WGM11) | _BV(WGM10) | _BV(COM1A0);
    TCCR1B = _BV(CS10) | _BV(WGM13) | _BV(WGM12);
    OCR1AH = (8000000 / _freq) >> 8;
-  OCR1AL = 8000000 / _freq;
+   OCR1AL = 8000000 / _freq;
+}
+
+inline void pwmToneDisable()
+{
+  TCCR1B = 0;
 }
