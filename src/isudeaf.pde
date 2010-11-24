@@ -12,7 +12,7 @@
 #define R3 A3
 #define R4 A4
 
-#define SPEAKER A5
+//#define SPEAKER A5
 
 enum Key {
   k_one,
@@ -54,7 +54,7 @@ unsigned short delta;
 int cntDataPoints;
 
 volatile int led = HIGH;
-LiquidCrystal lcd(0,1,2,3,4,5,6,7,8,9,10);
+LiquidCrystal lcd(0,1,2,3,4,5,6,7,8,A5,10);
 void setup()
 {
   screen = s1; //start on screen1
@@ -76,7 +76,7 @@ void setup()
   pinMode(R3, INPUT);
   pinMode(R4, INPUT);
 
-  pinMode(SPEAKER, OUTPUT); 
+  //pinMode(SPEAKER, OUTPUT); 
 
   lcd.begin(16,4);
 
@@ -85,19 +85,28 @@ void setup()
   ////////////////////////////
   // set the 8 bit timer2
   ////////////////////////////
-  TCCR1B = 0x0D;
-  TIMSK1 |= (1 << OCIE1A); //set bit 1 -> enable interupt CTC
+  TCCR2A = 0;//??
+  TCCR2B = 0x0D;
+  TIMSK2 |= (1 << OCIE2A); //set bit 1 -> enable interupt CTC
 
   sei();
 
   //set Output Compare Register
-  OCR1A = 0xFF;
+  //OCR1AH = 0x00;
+  OCR2A = 0xFF;
+  //0xFF;
   //TIMSK0 |= (1 << CS00) | (1 << CS02);
 }
 
-ISR(TIMER1_COMPA_vect) 
+ISR(TIMER2_COMPA_vect) 
 {
-
+  /*
+  digitalWrite(SPEAKER, led);
+  if(led == HIGH)
+    led = LOW;
+  else
+    led = HIGH;
+    */
   ///////////////////////////////
   // Scan Keypad
   //////////////////////////////
@@ -190,7 +199,7 @@ ISR(TIMER1_COMPA_vect)
       keyState = k_d;
     }
     digitalWrite(C4, LOW); //done with 4
-    delay(75);//debounce
+    //delay(75);//debounce
   }
   else
     keyState = k_NONE;  //nothing being pressed
@@ -225,7 +234,8 @@ void loop()
    *  At this point, we need to enter a state that switches
    *  between states 3,4, and 5
    */
-  tone(SPEAKER, frequency);
+  //tone(SPEAKER, frequency);
+  pwmTone(frequency);
   while(1)// changeme
   {
     ////////////////////////////
@@ -456,8 +466,9 @@ void handleInputScreen34()
       //redraw progbar
       drawScreen4();
       //make the new frequency
-      noTone(SPEAKER);
-      tone(SPEAKER, frequency);
+      pwmTone(frequency);
+      //noTone(SPEAKER);
+      //tone(SPEAKER, frequency);
     }
     break;
   case k_b:
@@ -466,8 +477,9 @@ void handleInputScreen34()
       frequency -= delta;
       screen = s4;
       drawScreen4();
-      noTone(SPEAKER);
-      tone(SPEAKER, frequency);
+      pwmTone(frequency);
+      //noTone(SPEAKER);
+      //tone(SPEAKER, frequency);
     }
     break;
   case k_c:
@@ -536,3 +548,13 @@ inline void handleInputScreen5()
 
 }
 
+void pwmTone(int _freq)
+{
+   //assume pwm is not on so set the control registers
+   //for Fast PWM with OCR1A as TOP
+   DDRB |= _BV(DDB1);
+   TCCR1A = _BV(WGM11) | _BV(WGM10) | _BV(COM1A0);
+   TCCR1B = _BV(CS10) | _BV(WGM13) | _BV(WGM12);
+   OCR1AH = (8000000 / _freq) >> 8;
+  OCR1AL = 8000000 / _freq;
+}
