@@ -1,0 +1,94 @@
+Total Number of data points = 36
+age = 24
+Uses earbuds
+Maximum Hearing Frequency = 18600
+age = 21
+Maximum Hearing Frequency = 15400
+age = 22
+Uses earbuds
+Maximum Hearing Frequency = 15900
+age = 21
+Maximum Hearing Frequency = 17200
+age = 19
+Maximum Hearing Frequency = 16700
+age = 42
+Maximum Hearing Frequency = 13700
+age = 22
+Maximum Hearing Frequency = 17300
+age = 33
+Uses earbuds
+Maximum Hearing Frequency = 13800
+age = 21
+Maximum Hearing Frequency = 16300
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 15400
+age = 27
+Maximum Hearing Frequency = 15500
+age = 26
+Maximum Hearing Frequency = 14300
+age = 23
+Maximum Hearing Frequency = 15300
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 17800
+age = 22
+Uses earbuds
+Maximum Hearing Frequency = 16200
+age = 21
+Maximum Hearing Frequency = 15900
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 15900
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 17300
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 14900
+age = 23
+Maximum Hearing Frequency = 17100
+age = 23
+Maximum Hearing Frequency = 14200
+age = 32
+Maximum Hearing Frequency = 15600
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 14200
+age = 24
+Uses earbuds
+Maximum Hearing Frequency = 16600
+age = 22
+Uses earbuds
+Maximum Hearing Frequency = 15800
+age = 36
+Uses earbuds
+Maximum Hearing Frequency = 15500
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 16000
+age = 25
+Uses earbuds
+Maximum Hearing Frequency = 16600
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 17600
+age = 21
+Uses earbuds
+Maximum Hearing Frequency = 17500
+age = 23
+Uses earbuds
+Maximum Hearing Frequency = 15100
+age = 24
+Uses earbuds
+Maximum Hearing Frequency = 16400
+age = 15
+Maximum Hearing Frequency = 15300
+age = 15
+Maximum Hearing Frequency = 15800
+age = 56
+Uses earbuds
+Maximum Hearing Frequency = 10200
+age = 59
+Uses earbuds
+Maximum Hearing Frequency = 11300
