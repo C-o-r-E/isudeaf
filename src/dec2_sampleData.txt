@@ -1,0 +1,44 @@
+Total Number of data points = 39
+
+Age		Freq.		Earbuds
+
+24		18600		True
+21		15400		False
+22		15900		True
+21		17200		False
+19		16700		False
+42		13700		False
+22		17300		False
+33		13800		True
+21		16300		False
+21		15400		True
+27		15500		False
+26		14300		False
+23		15300		False
+21		17800		True
+22		16200		True
+21		15900		False
+21		15900		True
+21		17300		True
+21		14900		True
+23		17100		False
+23		14200		False
+32		15600		False
+21		14200		True
+24		16600		True
+22		15800		True
+36		15500		True
+21		16000		True
+25		16600		True
+21		17600		True
+21		17500		True
+23		15100		True
+24		16400		True
+15		15300		False
+15		15800		False
+56		10200		True
+59		11300		True
+24		15000		False
+25		18300		True
+27		15500		True
+
