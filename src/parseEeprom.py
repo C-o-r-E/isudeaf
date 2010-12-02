@@ -9,6 +9,8 @@ binFile = open(sys.argv[1], "rb") #open in binary mode
 count  = ord(binFile.read(1))
 print("Total Number of data points = " + str(count));
 
+print("\nAge\t\tFreq.\t\tEarbuds\n")
+
 for r in range(count):
 	#read each data point
 	age = ord(binFile.read(1))
@@ -17,8 +19,4 @@ for r in range(count):
 		earbuds = True
 		age = age - 128;
 	freq = (ord(binFile.read(1)) << 8) + ord(binFile.read(1))
-	print("age = " + str(age))
-	if earbuds == True:
-		print("Uses earbuds")
-	print("Maximum Hearing Frequency = " + str(freq))
-
+	print(str(age) + "\t\t" + str(freq) + "\t\t" + str(earbuds))
